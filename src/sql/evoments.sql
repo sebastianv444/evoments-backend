@@ -1,41 +1,63 @@
 -- ===================================================
--- 1. TABLA: Usuarios
--- ---------------------------------------------------
--- Incluye ambos tipos de usuarios: CREADOR y CLIENTE.
--- Se recomienda almacenar la contraseña ya en hash.
+-- 0. – OPCIONAL: BORRAR TABLA UNIFICADA DE USUARIOS
+--    (Si ya no la vas a usar)
 -- ===================================================
-CREATE TABLE Usuarios (
+-- DROP TABLE IF EXISTS Usuarios;
+
+-- ===================================================
+-- 1. TABLA: Clientes
+-- ---------------------------------------------------
+-- Almacena solo la info necesaria de los compradores
+-- ===================================================
+CREATE TABLE Clientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     apellidos VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,  -- hash de la contraseña
+    password VARCHAR(255) NOT NULL,   -- hash de contraseña
     telefono VARCHAR(20),
-    rol ENUM('creador', 'cliente') NOT NULL,
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 -- ===================================================
--- 2. TABLA: Venues(Lugares)
+-- 2. TABLA: Creadores
 -- ---------------------------------------------------
--- Información del lugar físico donde se realizan eventos.
--- Al estar enfocado a Madrid, se pueden incluir solo los datos necesarios.
+-- Datos de organizadores a quienes se les ingresa
+-- un método de cobro (tarjeta tokenizada)
+-- ===================================================
+CREATE TABLE Creadores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellidos VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,   -- hash de contraseña
+    telefono VARCHAR(20),
+    -- ¡Nunca guardes el número completo en texto!  
+    -- Mejor almacena solo un token, los 4 últimos dígitos
+    -- y fecha de expiración que te proporcione el PSP.
+    tarjeta_token VARCHAR(100) NOT NULL,
+    tarjeta_last4 CHAR(4) NOT NULL,
+    tarjeta_expiry CHAR(5) NOT NULL,  -- MM/AA
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- ===================================================
+-- 3. TABLA: Venues (Lugares)
 -- ===================================================
 CREATE TABLE Venues (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
     direccion VARCHAR(255) NOT NULL,
     localidad VARCHAR(100) DEFAULT 'Madrid',
-    capacidad_total INT,   -- Capacidad máxima del local (como referencia)
+    capacidad_total INT,
     descripcion TEXT,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 -- ===================================================
--- 3. TABLA: Eventos
+-- 4. TABLA: Eventos
 -- ---------------------------------------------------
--- Cada evento está vinculado a un creador (usuario con rol 'creador')
--- y se realiza en un Venue.
+-- Cada evento lo crea un Creador y se celebra en un Venue.
 -- ===================================================
 CREATE TABLE Eventos (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,81 +67,99 @@ CREATE TABLE Eventos (
     descripcion TEXT,
     fecha_evento DATETIME NOT NULL,
     imagen VARCHAR(255),
-    estado ENUM('activo','cancelado','finalizado') DEFAULT 'activo',
+    estado ENUM('activo','cancelado','finalizado') 
+           DEFAULT 'activo',
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_eventos_creador FOREIGN KEY (id_creador) REFERENCES Usuarios(id) ON DELETE CASCADE,
-    CONSTRAINT fk_eventos_venue FOREIGN KEY (id_venue) REFERENCES Venues(id) ON DELETE RESTRICT
+    CONSTRAINT fk_eventos_creador
+      FOREIGN KEY (id_creador) 
+      REFERENCES Creadores(id)
+      ON DELETE CASCADE,
+    CONSTRAINT fk_eventos_venue
+      FOREIGN KEY (id_venue) 
+      REFERENCES Venues(id)
+      ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
 -- ===================================================
--- 4. TABLA: Zonas_Evento
--- ---------------------------------------------------
--- Cada evento puede tener varias zonas (ej. VIP, Premium, Palco, etc)
--- donde se define la capacidad y el precio específico de esa zona.
--- Se pueden establecer condiciones particulares según el evento,
--- por ejemplo, que algunas zonas tengan menos asientos disponibles.
+-- 5. TABLA: Zonas_Evento
 -- ===================================================
 CREATE TABLE Zonas_Evento (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_evento INT NOT NULL,
-    nombre VARCHAR(100) NOT NULL,       -- Ej. 'VIP', 'Premium', 'Palco'
-    capacidad INT NOT NULL,             -- Capacidad asignada a la zona para este evento
-    precio_base DECIMAL(10,2) NOT NULL,   -- Precio para esta zona
+    nombre VARCHAR(100) NOT NULL,       -- VIP, Premium, Palco...
+    capacidad INT NOT NULL,
+    precio_base DECIMAL(10,2) NOT NULL,
     descripcion VARCHAR(255),
-    CONSTRAINT fk_zonas_evento_evento FOREIGN KEY (id_evento) REFERENCES Eventos(id) ON DELETE CASCADE
+    CONSTRAINT fk_zonas_evento_evento
+      FOREIGN KEY (id_evento) 
+      REFERENCES Eventos(id)
+      ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- ===================================================
--- 5. TABLA: Asientos
--- ---------------------------------------------------
--- En eventos donde se asignen asientos numerados, se registran aquí.
--- No todos los eventos lo requieren, por lo que este dato es opcional.
--- Cada asiento se relaciona con una zona de un evento.
+-- 6. TABLA: Asientos (opcional)
 -- ===================================================
 CREATE TABLE Asientos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_zona INT NOT NULL,
-    fila INT,                    -- Puede ser NULL si no aplica
+    fila INT,
     numero INT,
-    estado ENUM('disponible','reservado','vendido') DEFAULT 'disponible',
-    CONSTRAINT fk_asientos_zona FOREIGN KEY (id_zona) REFERENCES Zonas_Evento(id) ON DELETE CASCADE,
-    UNIQUE(id_zona, fila, numero)  -- Para evitar duplicados en una misma zona
+    estado ENUM('disponible','reservado','vendido') 
+           DEFAULT 'disponible',
+    CONSTRAINT fk_asientos_zona
+      FOREIGN KEY (id_zona) 
+      REFERENCES Zonas_Evento(id)
+      ON DELETE CASCADE,
+    UNIQUE(id_zona, fila, numero)
 ) ENGINE=InnoDB;
 
 -- ===================================================
--- 6. TABLA: Entradas
+-- 7. TABLA: Entradas
 -- ---------------------------------------------------
--- Registro de la compra de entradas (tickets).
--- Cada entrada se asocia a un evento, un comprador y a una zona.
--- La asignación a un asiento es opcional (para los casos de asientos numerados).
--- Se puede ampliar con un estado (por ejemplo, activa, cancelada).
+-- Cada entrada la compra un Cliente para una Zona,
+-- y opcionalmente se asigna un Asiento.
 -- ===================================================
 CREATE TABLE Entradas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_evento INT NOT NULL,
-    id_comprador INT NOT NULL,   -- Usuario que compra (cliente)
-    id_zona INT NOT NULL,        -- Zona en el evento para la que se compra
-    id_asiento INT DEFAULT NULL, -- Opcional: se rellena solo si el evento tiene asignación de asiento
+    id_cliente INT NOT NULL,
+    id_zona INT NOT NULL,
+    id_asiento INT DEFAULT NULL,
     fecha_compra DATETIME DEFAULT CURRENT_TIMESTAMP,
-    estado ENUM('activa','cancelada','usada') DEFAULT 'activa',
-    CONSTRAINT fk_entradas_evento FOREIGN KEY (id_evento) REFERENCES Eventos(id) ON DELETE CASCADE,
-    CONSTRAINT fk_entradas_comprador FOREIGN KEY (id_comprador) REFERENCES Usuarios(id) ON DELETE CASCADE,
-    CONSTRAINT fk_entradas_zona FOREIGN KEY (id_zona) REFERENCES Zonas_Evento(id) ON DELETE RESTRICT,
-    CONSTRAINT fk_entradas_asiento FOREIGN KEY (id_asiento) REFERENCES Asientos(id) ON DELETE SET NULL
+    estado ENUM('activa','cancelada','usada') 
+           DEFAULT 'activa',
+    CONSTRAINT fk_entradas_evento
+      FOREIGN KEY (id_evento) 
+      REFERENCES Eventos(id)
+      ON DELETE CASCADE,
+    CONSTRAINT fk_entradas_cliente
+      FOREIGN KEY (id_cliente) 
+      REFERENCES Clientes(id)
+      ON DELETE CASCADE,
+    CONSTRAINT fk_entradas_zona
+      FOREIGN KEY (id_zona) 
+      REFERENCES Zonas_Evento(id)
+      ON DELETE RESTRICT,
+    CONSTRAINT fk_entradas_asiento
+      FOREIGN KEY (id_asiento) 
+      REFERENCES Asientos(id)
+      ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- ===================================================
--- 7. TABLA: Pagos
--- ---------------------------------------------------
--- Registro de la transacción o comprobante de pago.
--- Se almacena información relevante del método de pago y el comprobante.
+-- 8. TABLA: Pagos
 -- ===================================================
 CREATE TABLE Pagos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_entrada INT NOT NULL,
-    metodo_pago ENUM('tarjeta','transferencia','paypal','efectivo') NOT NULL,
-    link_comprobante VARCHAR(255),   -- Podría ser un link a PDF, imagen, etc.
-    estado_pago ENUM('pendiente','aprobado','rechazado') DEFAULT 'pendiente',
+    metodo_pago ENUM('tarjeta','transferencia','paypal','efectivo') 
+           NOT NULL,
+    link_comprobante VARCHAR(255),
+    estado_pago ENUM('pendiente','aprobado','rechazado') 
+           DEFAULT 'pendiente',
     fecha_pago DATETIME,
-    CONSTRAINT fk_pagos_entrada FOREIGN KEY (id_entrada) REFERENCES Entradas(id) ON DELETE CASCADE
+    CONSTRAINT fk_pagos_entrada
+      FOREIGN KEY (id_entrada) 
+      REFERENCES Entradas(id)
+      ON DELETE CASCADE
 ) ENGINE=InnoDB;

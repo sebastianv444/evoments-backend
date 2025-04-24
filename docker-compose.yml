@@ -1,0 +1,18 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: evoments-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ivseb7
+      MYSQL_DATABASE: evoments
+      MYSQL_USER: evoments_admin
+      MYSQL_PASSWORD: evoments_615
+    ports:
+      - '3306:3306'
+    volumes:
+      - evoments-db-data:/var/lib/mysql
+      - ./docker/db/:/docker-entrypoint-initdb.d
+
+volumes:
+  evoments-db-data:
