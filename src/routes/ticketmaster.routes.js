@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { index } from "../controllers/ticketmaster.controller.js";
+import * as controller from "../controllers/ticketmaster.controller.js";
 const router = Router();
 
-router.get("/:id", index);
+router.get("/", controller.getEvents);
 
 export default router;
