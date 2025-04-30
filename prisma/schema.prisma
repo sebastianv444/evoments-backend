@@ -50,10 +50,10 @@ enum PagoEstado {
 /// =======
 model Cliente {
   id            Int      @id @default(autoincrement())
+  clerkUserId   String   @unique
   nombre        String   @db.VarChar(100)
   apellidos     String   @db.VarChar(100)
-  email         String   @unique @db.VarChar(150)
-  password      String   @db.VarChar(255)
+  email         String   @unique @db.VarChar(150) 
   telefono      String?  @db.VarChar(20)
   fechaRegistro DateTime @default(now()) @map("fecha_registro")
 
