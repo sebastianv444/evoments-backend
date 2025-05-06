@@ -9,7 +9,12 @@ const environments = {
     baseUrl: "https://app.ticketmaster.com",
     discoveryPath: "/discovery/v2/events.json",
   },
-  cors: process.env
+  clerk: {
+    apiPublishable: process.env.CLERK_PUBLISHABLE_KEY,
+    apiKey: process.env.CLERK_SECRET_KEY,
+    jwtUrl: process.env.CLERK_JWT_KEY,
+  },
+  cors: process.env,
 };
 
 export default environments;
