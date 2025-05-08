@@ -1,8 +1,9 @@
 import { Router } from "express";
-import withClerk from "../middlewares/withClerk.js";
+import { clerkProtect } from "../middlewares/withClerk.js";
 import * as controller from "../controllers/user.controller.js";
 const router = Router();
 
-router.post("/sync", withClerk, controller.syncUserHandler);
+router.post("/sync", clerkProtect, controller.syncUserHandler);
+router.get("/prueba", (req, res) => res.status(200).json({ bien: true }));
 
 export default router;

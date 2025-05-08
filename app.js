@@ -4,7 +4,7 @@ import morgan from "morgan";
 import ticketmasterRoutes from "./src/routes/ticketmaster.routes.js";
 import userRoutes from "./src/routes/user.routes.js";
 import corsMiddleware from "./src/middlewares/cors.js";
-import { requireAuth } from "@clerk/express";
+import { clerkGlobal } from "./src/middlewares/withClerk.js";
 
 const app = express();
 
@@ -13,11 +13,10 @@ app.set("port", environments.app.port);
 
 // Middleware
 app.use(morgan("dev"));
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(corsMiddleware);
-// Opcional: Middleware global para proteger todas las rutas
-// app.use(requireAuth());
+app.use(clerkGlobal); // Clerk parsea cookies aquí (no redirige, solo decodifica sesión)
 
 // Routes
 app.use("/events", ticketmasterRoutes);
