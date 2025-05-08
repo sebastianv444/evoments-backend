@@ -24,6 +24,8 @@
   },
   "homepage": "https://github.com/sebastianv444/evoments-backend#readme",
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.23",
+    "@clerk/express": "^1.4.14",
     "@prisma/client": "^6.6.0",
     "axios": "^1.9.0",
     "cors": "^2.8.5",
