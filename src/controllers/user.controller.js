@@ -2,14 +2,9 @@ import { syncUser } from "../models/user.model.js";
 
 export async function syncUserHandler(req, res) {
   try {
+    console.log("Estoy en el cotrolador!");
+    console.log(req.body);
     const { clerkId, email, firstName, lastName, phoneNumber } = req.body;
-    const tokenUserId = req.auth.userId;
-
-    console.log(clerkId, email, firstName, lastName, phoneNumber);
-
-    if (clerkId !== tokenUserId) {
-      return res.status(403).json({ error: "User mismatch" });
-    }
 
     const user = await syncUser({
       clerkId,
@@ -20,6 +15,6 @@ export async function syncUserHandler(req, res) {
     });
     res.status(200).json({ success: true, user });
   } catch (err) {
-    return res.status(404).json({ error: true, msj: err });
+    return res.status(400).json({ error: true, msj: err });
   }
 }

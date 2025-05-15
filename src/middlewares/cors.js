@@ -1,6 +1,6 @@
 import cors from "cors";
 
-const allowedOrigins = ["http://localhost:5173", "https://evoments.vercel.app"];
+const allowedOrigins = ["http://localhost:5173", "https://www.evoments.xyz/"];
 
 export default cors({
   origin: (origin, callback) => {

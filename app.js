@@ -4,7 +4,7 @@ import morgan from "morgan";
 import ticketmasterRoutes from "./src/routes/ticketmaster.routes.js";
 import userRoutes from "./src/routes/user.routes.js";
 import corsMiddleware from "./src/middlewares/cors.js";
-import { clerkGlobal } from "./src/middlewares/withClerk.js";
+/* import { clerkGlobal } from "./src/middlewares/withClerk.js"; */
 
 const app = express();
 
@@ -16,7 +16,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(corsMiddleware);
-app.use(clerkGlobal); // Clerk parsea cookies aquí (no redirige, solo decodifica sesión)
+/* app.use(clerkGlobal); */ // Clerk parsea cookies aquí (no redirige, solo decodifica sesión)
 
 // Routes
 app.use("/events", ticketmasterRoutes);
