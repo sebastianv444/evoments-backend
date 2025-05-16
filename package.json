@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "node --watch ./app.js",
     "start": "node ./app.js",
-    "migrate": "prisma migrate deploy"
+    "migrate": "prisma migrate deploy",
+    "prepare": "prisma generate"
   },
   "repository": {
     "type": "git",
