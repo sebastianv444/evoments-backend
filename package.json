@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "node --watch ./app.js",
-    "start": "node ./app.js",
+    "start": "npm run migrate && node ./app.js",
     "migrate": "prisma migrate deploy",
     "prepare": "prisma generate"
   },
