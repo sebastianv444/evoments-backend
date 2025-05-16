@@ -6,17 +6,20 @@ export const syncUser = async ({
   lastName,
   email,
   phoneNumber,
+  username
 }) => {
   return await prisma.cliente.upsert({
     where: { clerkUserId: clerkId },
     create: {
       clerkUserId: clerkId,
+      username,
       nombre: firstName,
       apellidos: lastName,
       email,
       telefono: phoneNumber,
     },
     update: {
+      username,
       nombre: firstName,
       apellidos: lastName,
       email,
