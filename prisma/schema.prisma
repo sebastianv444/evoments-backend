@@ -1,0 +1,148 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventoEstado {
+  ACTIVO
+  CANCELADO
+  FINALIZADO
+  PENDIENTE
+}
+
+enum AsientoEstado {
+  DISPONIBLE
+  RESERVADO
+  VENDIDO
+}
+
+enum EntradaEstado {
+  ACTIVA
+  CANCELADA
+  USADA
+}
+
+/// =======
+/// TABLAS
+/// =======
+model Cliente {
+  id            Int      @id @default(autoincrement())
+  clerkUserId   String   @unique
+  username      String?  @unique @db.VarChar(100)
+  nombre        String   @db.VarChar(100)
+  apellidos     String   @db.VarChar(100)
+  email         String   @unique @db.VarChar(150)
+  telefono      String?  @db.VarChar(20)
+  fechaRegistro DateTime @default(now()) @map("fecha_registro")
+
+  entradas Entrada[]
+}
+
+model Creador {
+  id              Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  apellidos       String   @db.VarChar(100)
+  email           String   @unique @db.VarChar(150)
+  password        String   @db.VarChar(255)
+  telefono        String?  @db.VarChar(20)
+  stripeAccountId String   @unique
+  fechaRegistro   DateTime @default(now()) @map("fecha_registro")
+
+  eventos Evento[]
+}
+
+model Venue {
+  id             Int      @id @default(autoincrement())
+  nombre         String   @db.VarChar(150)
+  direccion      String   @db.VarChar(255)
+  localidad      String   @default("Madrid") @db.VarChar(100)
+  capacidadTotal Int      @map("capacidad_total") @db.Int
+  descripcion    String?  @db.Text
+  fechaCreacion  DateTime @default(now()) @map("fecha_creacion")
+
+  eventos Evento[]
+}
+
+model Evento {
+  id            Int          @id @default(autoincrement())
+  creadorId     Int          @map("id_creador")
+  venueId       Int          @map("id_venue")
+  titulo        String       @db.VarChar(150)
+  descripcion   String?      @db.Text
+  fechaEvento   DateTime     @map("fecha_evento")
+  imagen        String?      @db.VarChar(255)
+  estado        EventoEstado @default(PENDIENTE)
+  fechaCreacion DateTime     @default(now()) @map("fecha_creacion")
+
+  creador     Creador      @relation(fields: [creadorId], references: [id], onDelete: Cascade)
+  venue       Venue        @relation(fields: [venueId], references: [id], onDelete: Restrict)
+  zonasEvento ZonaEvento[]
+  entradas    Entrada[]
+}
+
+model ZonaEvento {
+  id            Int       @id @default(autoincrement())
+  eventoId      Int       @map("id_evento")
+  nombre        String    @db.VarChar(100)
+  capacidad     Int       @db.Int
+  precioBase    Decimal   @map("precio_base") @db.Decimal(10, 2)
+  descripcion   String?   @db.VarChar(255)
+  ventaNumerada Boolean   @default(false) // true si quiero con butacas.
+  evento        Evento    @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  asientos      Asiento[]
+  entradas      Entrada[]
+}
+
+model Asiento {
+  id     Int           @id @default(autoincrement())
+  zonaId Int           @map("id_zona")
+  fila   String?       @db.VarChar(5)
+  numero Int?          @db.Int
+  estado AsientoEstado @default(DISPONIBLE)
+
+  zona     ZonaEvento @relation(fields: [zonaId], references: [id], onDelete: Cascade)
+  entradas Entrada[]
+
+  @@unique([zonaId, fila, numero])
+}
+
+model Entrada {
+  id          Int           @id @default(autoincrement())
+  eventoId    Int           @map("id_evento")
+  clienteId   Int           @map("id_cliente")
+  zonaId      Int           @map("id_zona")
+  asientoId   Int?          @map("id_asiento")
+  fechaCompra DateTime      @default(now()) @map("fecha_compra")
+  estado      EntradaEstado @default(ACTIVA)
+
+  evento     Evento     @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  cliente    Cliente    @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  zonaEvento ZonaEvento @relation(fields: [zonaId], references: [id], onDelete: Restrict)
+  asiento    Asiento?   @relation(fields: [asientoId], references: [id], onDelete: SetNull)
+  pagos      Pago[]
+}
+
+model Pago {
+  id                    Int      @id @default(autoincrement())
+  entradaId             Int      @map("id_entrada")
+  stripePaymentIntentId String   @unique @map("stripe_payment_intent_id")
+  stripeChargeId        String?  @unique @map("stripe_charge_id")
+  stripeTransferId      String?  @unique @map("stripe_transfer_id")
+  amount                Decimal  @db.Decimal(10, 2) // Importe total recibido
+  currency              String   @db.Char(3) // "EUR"
+  applicationFee        Decimal? @map("application_fee") @db.Decimal(10, 2)
+  payoutStatus          String?  @map("payout_status")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  entrada Entrada @relation(fields: [entradaId], references: [id], onDelete: Cascade)
+}
