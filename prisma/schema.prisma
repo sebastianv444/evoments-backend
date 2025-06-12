@@ -20,6 +20,15 @@ enum EventoEstado {
   PENDIENTE
 }
 
+enum EventoCategoria {
+  DEPORTE
+  CONCIERTO
+  SOCIAL
+  CORPORATIVO
+  EDUCATIVO
+  OTROS
+}
+
 enum AsientoEstado {
   DISPONIBLE
   RESERVADO
@@ -36,24 +45,26 @@ enum EntradaEstado {
 /// TABLAS
 /// =======
 model Cliente {
-  id            Int      @id @default(autoincrement())
-  clerkUserId   String   @unique
-  username      String?  @unique @db.VarChar(100)
-  nombre        String   @db.VarChar(100)
-  apellidos     String   @db.VarChar(100)
-  email         String   @unique @db.VarChar(150)
-  telefono      String?  @db.VarChar(20)
-  fechaRegistro DateTime @default(now()) @map("fecha_registro")
+  id              Int      @id @default(autoincrement())
+  clerkUserId     String   @unique
+  username        String?  @unique @db.VarChar(100)
+  nombre          String   @db.VarChar(100)
+  apellidos       String   @db.VarChar(100)
+  email           String   @unique @db.VarChar(150)
+  telefono        String?  @db.VarChar(20)
+  stripeAccountId String?  @unique
+  fechaRegistro   DateTime @default(now()) @map("fecha_registro")
 
   entradas Entrada[]
 }
 
 model Creador {
   id              Int      @id @default(autoincrement())
+  clerkUserId     String   @unique
+  username        String?  @unique @db.VarChar(100)
   nombre          String   @db.VarChar(100)
   apellidos       String   @db.VarChar(100)
   email           String   @unique @db.VarChar(150)
-  password        String   @db.VarChar(255)
   telefono        String?  @db.VarChar(20)
   stripeAccountId String   @unique
   fechaRegistro   DateTime @default(now()) @map("fecha_registro")
@@ -74,15 +85,16 @@ model Venue {
 }
 
 model Evento {
-  id            Int          @id @default(autoincrement())
-  creadorId     Int          @map("id_creador")
-  venueId       Int          @map("id_venue")
-  titulo        String       @db.VarChar(150)
-  descripcion   String?      @db.Text
-  fechaEvento   DateTime     @map("fecha_evento")
-  imagen        String?      @db.VarChar(255)
-  estado        EventoEstado @default(PENDIENTE)
-  fechaCreacion DateTime     @default(now()) @map("fecha_creacion")
+  id            Int             @id @default(autoincrement())
+  creadorId     Int             @map("id_creador")
+  venueId       Int             @map("id_venue")
+  titulo        String          @db.VarChar(150)
+  descripcion   String?         @db.Text
+  fechaEvento   DateTime        @map("fecha_evento")
+  imagen        String?         @db.VarChar(255)
+  estado        EventoEstado    @default(PENDIENTE)
+  fechaCreacion DateTime        @default(now()) @map("fecha_creacion")
+  categoria     EventoCategoria @default(OTROS)
 
   creador     Creador      @relation(fields: [creadorId], references: [id], onDelete: Cascade)
   venue       Venue        @relation(fields: [venueId], references: [id], onDelete: Restrict)

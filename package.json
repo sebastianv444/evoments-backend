@@ -33,7 +33,9 @@
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "express-async-errors": "^3.1.1",
-    "morgan": "^1.10.0"
+    "micro": "^10.0.1",
+    "morgan": "^1.10.0",
+    "stripe": "^18.1.1"
   },
   "devDependencies": {
     "prisma": "^6.6.0"

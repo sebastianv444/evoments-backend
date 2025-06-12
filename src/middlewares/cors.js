@@ -11,6 +11,6 @@ export default cors({
     }
   },
   methods: ["GET", "POST", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-clerk-user-id"],
   credentials: true,
 });
