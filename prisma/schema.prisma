@@ -94,7 +94,7 @@ model Evento {
   imagen        String?         @db.VarChar(255)
   estado        EventoEstado    @default(PENDIENTE)
   fechaCreacion DateTime        @default(now()) @map("fecha_creacion")
-  categoria     EventoCategoria @default(OTROS)
+  categoria      EventoCategoria @default(OTROS)
 
   creador     Creador      @relation(fields: [creadorId], references: [id], onDelete: Cascade)
   venue       Venue        @relation(fields: [venueId], references: [id], onDelete: Restrict)
