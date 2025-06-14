@@ -1,25 +1,14 @@
-import { syncCrearEvento } from "../models/CrearEvento.models";
+import { syncCrearEvento } from "../models/CrearEvento.model.js";
 
 export async function crearEvento(req, res) {
   try {
-    console.log("Estoy en el cotrolador crearEvento");
     console.log(req.body);
-    const { titulo,
-      descripcion,
-      fechaEvento,
-      categoria,
-      zonas } =
-      req.body;
-
-    const user = await syncCrearEvento({
-      titulo,
-      descripcion,
-      fechaEvento,
-      categoria,
-      zonas,
-    });
-    res.status(200).json({ success: true, user });
+    const evento = await syncCrearEvento(req.body);
+    return res.status(200).json({ success: true, evento });
   } catch (err) {
-    return res.status(400).json({ error: true, msj: err });
+    console.error("Error en crearEvento:", err);
+    return res
+      .status(400)
+      .json({ success: false, message: err.message });
   }
 }
