@@ -8,6 +8,7 @@ import corsMiddleware from "./src/middlewares/cors.js";
 import { handleWebhook } from "./src/controllers/webhook.controller.js";
 import EventoRoutes from "./src/routes/EventosCrear.routes.js";
 import eventRoutes from "./src/routes/events.routes.js";
+import adminRouteEvents from "./src/routes/adminRouteEvents.route.js";
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/crear", EventoRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/admin", adminRouteEvents);
 
 app.listen(app.get("port"), () => {
   console.log("Escuchando por el puerto: " + app.get("port"));
