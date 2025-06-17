@@ -7,7 +7,7 @@ import stripeRoutes from "./src/routes/stripe.routes.js";
 import corsMiddleware from "./src/middlewares/cors.js";
 import { handleWebhook } from "./src/controllers/webhook.controller.js";
 import EventoRoutes from "./src/routes/EventosCrear.routes.js";
-
+import eventRoutes from "./src/routes/events.routes.js";
 
 const app = express();
 
@@ -36,6 +36,7 @@ app.use("/events", ticketmasterRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/crear", EventoRoutes);
+app.use("/api/events", eventRoutes);
 
 app.listen(app.get("port"), () => {
   console.log("Escuchando por el puerto: " + app.get("port"));
