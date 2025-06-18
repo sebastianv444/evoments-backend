@@ -4,6 +4,7 @@ const environments = {
   app: {
     port: process.env.PORT || 4000,
     url_front: process.env.FRONTEND_URL || "http://localhost:5173",
+    url_back: process.env.API_URL || "http://localhost:4000",
   },
   ticketmaster: {
     apiKey: process.env.TM_API_KEY,
@@ -19,6 +20,9 @@ const environments = {
   stripe: {
     apiKey: process.env.STRIPE_SECRET_KEY,
     webhookKey: process.env.STRIPE_WEBHOOK_SECRET,
+  },
+  resend: {
+    apiKey: process.env.RESEND_API_KEY,
   },
 };
 

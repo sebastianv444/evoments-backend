@@ -30,6 +30,14 @@ export async function searchEventsHandler(req, res) {
             clerkUserId: true,
           },
         },
+        zonasEvento: {
+          select: {
+            id: true,
+            nombre: true,
+            capacidad: true,
+            precioBase: true,
+          },
+        },
       },
     });
     console.log(events);

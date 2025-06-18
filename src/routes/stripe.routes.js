@@ -1,5 +1,8 @@
 import express from "express";
-import { crearCuentaExpress } from "../controllers/stripe.controller.js";
+import {
+  crearCuentaExpress,
+  crearCheckoutSession,
+} from "../controllers/stripe.controller.js";
 import stripe from "../utils/stripe.js";
 import { crearLoginLinkExpress } from "../controllers/dashboard.controller.js";
 
@@ -11,5 +14,6 @@ router.delete("/eliminarCuenta/:id", async (req, res) => {
   res.status(200).json({ res: deleted });
 });
 router.get("/login-link", crearLoginLinkExpress);
+router.post("/create-checkout-session", crearCheckoutSession);
 
 export default router;

@@ -94,7 +94,7 @@ model Evento {
   imagen        String?         @db.VarChar(255)
   estado        EventoEstado    @default(PENDIENTE)
   fechaCreacion DateTime        @default(now()) @map("fecha_creacion")
-  categoria      EventoCategoria @default(OTROS)
+  categoria     EventoCategoria @default(OTROS)
 
   creador     Creador      @relation(fields: [creadorId], references: [id], onDelete: Cascade)
   venue       Venue        @relation(fields: [venueId], references: [id], onDelete: Restrict)
@@ -136,18 +136,22 @@ model Entrada {
   asientoId   Int?          @map("id_asiento")
   fechaCompra DateTime      @default(now()) @map("fecha_compra")
   estado      EntradaEstado @default(ACTIVA)
+  qrToken     String        @unique
+  qrEnviado   Boolean?      @default(false)
 
   evento     Evento     @relation(fields: [eventoId], references: [id], onDelete: Cascade)
   cliente    Cliente    @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   zonaEvento ZonaEvento @relation(fields: [zonaId], references: [id], onDelete: Restrict)
   asiento    Asiento?   @relation(fields: [asientoId], references: [id], onDelete: SetNull)
   pagos      Pago[]
+
+  @@index([qrToken])
 }
 
 model Pago {
   id                    Int      @id @default(autoincrement())
   entradaId             Int      @map("id_entrada")
-  stripePaymentIntentId String   @unique @map("stripe_payment_intent_id")
+  stripePaymentIntentId String   @map("stripe_payment_intent_id")
   stripeChargeId        String?  @unique @map("stripe_charge_id")
   stripeTransferId      String?  @unique @map("stripe_transfer_id")
   amount                Decimal  @db.Decimal(10, 2) // Importe total recibido
