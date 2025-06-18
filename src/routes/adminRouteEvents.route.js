@@ -5,6 +5,6 @@ const router = Router();
 
 router.get("/eventos-pendientes", controller.eventospendientes);
 router.post("/eventos/actualizarEstadoEvento", controller.actualizarEstadoEvento);
-
+router.post("/comprobacionAdmin", controller.comprobacionAdmin);
 
 export default router;

@@ -44,3 +44,31 @@ export const actualizarEstadoEvento = async (req, res) => {
 
     }
 }
+
+export const comprobacionAdmin = async(req,res) =>{
+     try {
+    const { identificacion } = req.body;
+
+    if (!identificacion) {
+      return res.status(400).json({ error: "Falta el email del admin" });
+    }
+    console.log(identificacion);
+
+    const admin = await prisma.admin.findUnique({
+      where: { identificacion },
+    });
+    console.log(admin)
+
+    if (!admin) {
+      return res.status(404).json({ error: "admin no encontrado" });
+    }else if (admin){
+        console.log("Admin cogido en el backend")
+        return res.json({
+        isAdmin: true,
+      });
+    }
+  } catch (error) {
+    console.error("Error obteniendo eventos del creador:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+}
