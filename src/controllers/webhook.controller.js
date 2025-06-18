@@ -1,5 +1,3 @@
-// src/controllers/webhook.controller.js
-
 import stripe from "../utils/stripe.js";
 import {
   getUserByStripeAccountId,

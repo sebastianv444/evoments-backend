@@ -47,3 +47,43 @@ export async function searchEventsHandler(req, res) {
     res.status(500).json({ error: "Error interno" });
   }
 }
+
+/* export async function getFirstApprovedEventsHandler(req, res) {
+  try {
+    const events = await prisma.evento.findMany({
+      where: {
+        estado: "ACTIVO", // Make sure this matches the enum value in your Prisma schema, without quotes if it's an enum
+      },
+      orderBy: { fechaEvento: "asc" },
+      take: 5,
+      select: {
+        id: true,
+        titulo: true,
+        fechaEvento: true,
+        imagen: true,
+        categoria: true,
+        descripcion: true,
+        estado: true,
+        creador: {
+          select: {
+            nombre: true,
+            clerkUserId: true,
+          },
+        },
+        zonasEvento: {
+          select: {
+            id: true,
+            nombre: true,
+            capacidad: true,
+            precioBase: true,
+          },
+        },
+      },
+    });
+    console.log(events);
+    res.json({ events });
+  } catch (err) {
+    console.error("Error en getFirstApprovedEventsHandler:", err);
+    res.status(500).json({ error: "Error interno" });
+  }
+} */
