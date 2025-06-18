@@ -9,7 +9,7 @@ import { handleWebhook } from "./src/controllers/webhook.controller.js";
 import EventoRoutes from "./src/routes/EventosCrear.routes.js";
 import eventRoutes from "./src/routes/events.routes.js";
 import adminRouteEvents from "./src/routes/adminRouteEvents.route.js";
-
+import EventosDelPropioCreador from "./src/routes/eventosCreadoresRoute.route.js";
 const app = express();
 
 // Configs
@@ -39,6 +39,7 @@ app.use("/api/stripe", stripeRoutes);
 app.use("/api/crear", EventoRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/admin", adminRouteEvents);
+app.use("/api/eventos-creadores", EventosDelPropioCreador);
 
 app.listen(app.get("port"), () => {
   console.log("Escuchando por el puerto: " + app.get("port"));
